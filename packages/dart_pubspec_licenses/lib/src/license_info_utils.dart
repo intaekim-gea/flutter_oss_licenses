@@ -52,5 +52,43 @@ Future<List<Package>> generateLicenseInfo({required String pubspecLockPath}) asy
       ),
     ),
   );
-  return loadedPackages.where((p) => p != null).cast<Package>().toList();
+
+  final filtered =
+      loadedPackages.where((p) => p != null).cast<Package>().toList();
+  // Skip...
+  // ex)
+  // shared_preferences
+  // ㄴ shared_preferences_android <-- skip
+  // ㄴ shared_preferences_ios <-- skip
+  var previous = '';
+  final notPrevious = {
+    'file',
+    'xml',
+    'get',
+    'http',
+    'http2',
+    'json',
+    'path',
+    'plugin',
+    'shelf',
+    'sqflite',
+    'video',
+    'flutter',
+    'web',
+  };
+  final newFiltered = filtered.where((e) {
+    if (previous.isEmpty || !e.name.contains(previous)) {
+      if (!notPrevious.contains(e.name)) previous = e.name;
+      if (e.homepage != null || e.repository != null) {
+        if (!e.name.startsWith('_')) {
+          // if (!(e.repository ?? '').contains('https://github.com/dart-lang')) {
+          return true;
+          // }
+        }
+      }
+    }
+    print('excluded: ${e.name}, ${e.homepage}, ${e.repository}');
+    return false;
+  }).toList();
+  return newFiltered;
 }
