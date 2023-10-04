@@ -4,6 +4,7 @@
 /.packages
 
 # Don't add our own
+/artifacts
 /lib/
 /lib/oss_licenses.dart
 .dart_tool/package_config.json

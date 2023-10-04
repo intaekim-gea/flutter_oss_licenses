@@ -13,14 +13,16 @@ main(List<String> args) async {
     if (results['help']) {
       printUsage(parser);
       return 0;
+    } else if (results['input'] == null) {
+      printUsage(parser);
+      return 3;
     } else if (results.rest.isNotEmpty) {
       print('WARNING: extra parameter given\n');
       printUsage(parser);
       return 3;
     }
 
-    final inputFilePath =
-        results['input'] ?? path.join('.', 'oss_licenses.json');
+    final inputFilePath = results['input'];
     final outputFilePath =
         results['output'] ?? path.join('.', 'oss_licenses.md');
     final metaFilePath = results['meta'];
@@ -54,10 +56,6 @@ main(List<String> args) async {
 ArgParser getArgParser() {
   final parser = ArgParser();
 
-  parser.addOption('output', abbr: 'o', defaultsTo: null, help: '''
-Specify output file path.
-The default output file: oss_licenses.md
-''');
   parser.addOption(
     'input',
     abbr: 'i',
@@ -65,11 +63,27 @@ The default output file: oss_licenses.md
     help:
         'Specify input file path of JSON file that is including list of Package.',
   );
+  parser.addOption('output', abbr: 'o', defaultsTo: null, help: '''
+Specify output file path.
+The default output file: oss_licenses.md
+''');
   parser.addOption(
     'meta',
     abbr: 'm',
     defaultsTo: null,
-    help: 'Metafile to be added to the table. JSON format.',
+    help: '''
+Metafile to be added to the table. JSON format.
+e.g.) 
+  {
+    "Yes; Security Data; Personal Data, Sensitive Personal Data\n\n(Identifiable, Diagnostic)": [
+        "flutter_lints",
+        "source_span"
+    ],
+    "Yes; Personal Data\n\n(Diagnostic)": [
+        "term_glyph"
+    ]
+  } 
+''',
   );
   parser.addFlag('help',
       abbr: 'h', defaultsTo: false, negatable: false, help: 'Show the help.');
