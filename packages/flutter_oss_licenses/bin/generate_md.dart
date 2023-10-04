@@ -45,6 +45,12 @@ main(List<String> args) async {
     }
 
     final output = await oss.generateMarkdownTable(packages, meta);
+
+    if (path.dirname(outputFilePath) != '.') {
+      Directory.fromUri(Uri.directory(path.dirname(outputFilePath))).createSync(
+        recursive: true,
+      );
+    }
     await File(outputFilePath).writeAsString(output);
     return 0;
   } catch (e, s) {

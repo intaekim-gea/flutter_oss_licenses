@@ -12,7 +12,7 @@ Future<String> generateMarkdownTable(
         (index, package) => {
           'Item #': index + 1,
           'Name, Version, Website':
-              '${package.name}<br>${package.version}<br>${package.repository ?? package.homepage}<br>',
+              '${package.name}<br>${package.version}<br>${package.repository ?? package.homepage}',
           'Description of Use': package.description.replaceAll('\n', ''),
           'Used for Security Function':
               meta[package.name]?.replaceAll('\n', '<br>') ?? 'N/A',
