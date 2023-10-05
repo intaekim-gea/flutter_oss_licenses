@@ -32,7 +32,10 @@ String? guessPubCacheDir() {
   return null;
 }
 
-Future<List<Package>> generateLicenseInfo({required String pubspecLockPath}) async {
+Future<List<Package>> generateLicenseInfo({
+  required String pubspecLockPath,
+  bool excludeDartlang = true,
+}) async {
   final pubCacheDir = guessPubCacheDir();
   if (pubCacheDir == null) {
     throw "could not find pub cache directory";
@@ -81,9 +84,9 @@ Future<List<Package>> generateLicenseInfo({required String pubspecLockPath}) asy
       if (!notPrevious.contains(e.name)) previous = e.name;
       if (e.homepage != null || e.repository != null) {
         if (!e.name.startsWith('_')) {
-          // if (!(e.repository ?? '').contains('https://github.com/dart-lang')) {
-          return true;
-          // }
+          if (!excludeDartlang || !(e.repository ?? '').contains('https://github.com/dart-lang')) {
+            return true;
+          }
         }
       }
     }

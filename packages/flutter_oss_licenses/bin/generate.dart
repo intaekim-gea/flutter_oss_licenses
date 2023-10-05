@@ -30,8 +30,10 @@ main(List<String> args) async {
     final projectRoot = results['project-root'] ?? await findProjectRoot();
     final outputFilePath = results['output'] ?? path.join(projectRoot, 'lib', 'oss_licenses.dart');
     final generateJson = results['json'] || path.extension(outputFilePath).toLowerCase() == '.json';
+    final excludeDartlang = results['exclude-dartlang'] ?? true;
     final licenses = await oss.generateLicenseInfo(
       pubspecLockPath: path.join(projectRoot, 'pubspec.lock'),
+      excludeDartlang: excludeDartlang,
     );
 
     final String output;
@@ -159,6 +161,8 @@ The default output file path depends on the --json flag:
       abbr: 'p', defaultsTo: null, help: 'Explicitly specify project root directory that contains pubspec.lock.');
   parser.addFlag('json',
       abbr: 'j', defaultsTo: false, negatable: false, help: 'Generate JSON file rather than dart file.');
+  parser.addFlag('exclude-dartlang', 
+      defaultsTo: true, negatable: true, help: 'Excludes dart-lang oss. Set --no-exclude-dartlang if you want add dart-lang oss');    
   parser.addFlag('help', abbr: 'h', defaultsTo: false, negatable: false, help: 'Show the help.');
 
   return parser;
