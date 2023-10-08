@@ -79,12 +79,24 @@ Future<List<Package>> generateLicenseInfo({
     'flutter',
     'web',
   };
+  final exclude = {
+    'file_selector_',
+    '_platform_interface',
+  };
+  final excludedDomains = {
+    'https://github.com/dart-lang',
+    'https://github.com/google',
+  };
   final newFiltered = filtered.where((e) {
     if (previous.isEmpty || !e.name.contains(previous)) {
       if (!notPrevious.contains(e.name)) previous = e.name;
       if (e.homepage != null || e.repository != null) {
-        if (!e.name.startsWith('_')) {
-          if (!excludeDartlang || !(e.repository ?? '').contains('https://github.com/dart-lang')) {
+        if (!e.name.startsWith('_') &&
+            !exclude.any((exclude) => e.name.contains(exclude))) {
+          if (!excludeDartlang ||
+              !excludedDomains.any((exclude) =>
+                  e.repository?.contains(exclude) == true ||
+                  e.homepage?.contains(exclude) == true)) {
             return true;
           }
         }
