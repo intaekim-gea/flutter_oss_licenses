@@ -107,9 +107,8 @@ class Package {
       return null;
     }
 
-    final version = outerName == 'flutter' && flutterDir != null
-        ? await File(path.join(flutterDir, 'version')).readAsString()
-        : yaml['version'];
+    final version =
+        outerName == 'flutter' && flutterDir != null ? getFlutterVersionFromDirectory(flutterDir) : yaml['version'];
     if (version is! String) {
       return null;
     }
@@ -127,6 +126,27 @@ class Package {
         isMarkdown: isMarkdown,
         isSdk: isSdk,
         isDirectDependency: isDirectDependency);
+  }
+
+  /// Retrieves the Flutter SDK version from the specified Flutter directory.
+  ///
+  /// [flutterDir] is the path to the Flutter SDK directory.
+  /// Returns the Flutter version as a string, or null if it cannot be determined.
+  ///
+  /// This method reads the `flutter.version.json` file located in the `bin/cache` directory of the Flutter SDK.
+  static Future<String?> getFlutterVersionFromDirectory(String flutterDir) async {
+    try {
+      final versionFile = File(path.join(flutterDir, 'bin/cache/flutter.version.json'));
+      if (await versionFile.exists()) {
+        final versionJson = loadYaml(await versionFile.readAsString());
+        if (versionJson is Map && versionJson['flutterVersion'] is String) {
+          return versionJson['flutterVersion'];
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+    return null;
   }
 }
 
