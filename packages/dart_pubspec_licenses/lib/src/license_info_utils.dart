@@ -90,6 +90,7 @@ Future<ProjectStructure> listDependencies({
   List<String> ignore = const [],
   bool generateDevDependencies = true,
   int maxConcurrency = 10,
+  bool excludeDartlang = true,
 }) async {
   final pubCacheDir = guessPubCacheDir();
   if (pubCacheDir == null) {
@@ -148,6 +149,49 @@ Future<ProjectStructure> listDependencies({
 
   myPackage.updateDependencies(packagesByName);
   packagesByName.removeWhere((key, value) => key == myPackage.name);
+
+  // Skip...
+  // ex)
+  // shared_preferences
+  // ㄴ shared_preferences_android <-- skip
+  // ㄴ shared_preferences_ios <-- skip
+  var previous = '';
+  final notPrevious = {
+    'file',
+    'xml',
+    'get',
+    'http',
+    'http2',
+    'json',
+    'path',
+    'plugin',
+    'shelf',
+    'sqflite',
+    'video',
+    'flutter',
+    'web',
+  };
+  final exclude = {'file_selector_', '_platform_interface'};
+  final excludedDomains = {'https://github.com/dart-lang', 'https://github.com/google', 'https://flutter.dev'};
+  final newFiltered = packagesByName.values.where((e) {
+    if (previous.isEmpty || !e.name.contains(previous)) {
+      if (!notPrevious.contains(e.name)) previous = e.name;
+      if (e.homepage != null || e.repository != null) {
+        if (!e.name.startsWith('_') && !exclude.any((exclude) => e.name.contains(exclude))) {
+          if (!excludeDartlang ||
+              !excludedDomains.any(
+                (exclude) => e.repository?.contains(exclude) == true || e.homepage?.contains(exclude) == true,
+              )) {
+            return true;
+          }
+        }
+      }
+    }
+    print('excluded: ${e.name}, ${e.homepage}, ${e.repository}');
+    return false;
+  }).toList();
+  packagesByName.clear();
+  packagesByName.addAll({for (var e in newFiltered) e.name: e});
 
   return ProjectStructure(
     package: myPackage,

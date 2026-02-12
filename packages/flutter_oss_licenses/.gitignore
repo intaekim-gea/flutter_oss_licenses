@@ -3,3 +3,4 @@
 .vscode/
 /.packages
 \.dart_tool/
+/artifacts

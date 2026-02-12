@@ -42,9 +42,11 @@ Future<int> generate(List<String> args) async {
         results['output'] ??
         (results['json'] ? 'oss_licenses.json' : path.join(projectRoot, 'lib', 'oss_licenses.dart'));
     final generateJson = results['json'] || path.extension(outputFilePath).toLowerCase() == '.json';
+    final excludeDartlang = results['exclude-dartlang'] ?? true;
     final deps = await oss.listDependencies(
       pubspecYamlPath: path.join(projectRoot, 'pubspec.yaml'),
       ignore: results['ignore'],
+      excludeDartlang: excludeDartlang,
     );
 
     final String output;
@@ -53,7 +55,8 @@ Future<int> generate(List<String> args) async {
       output = const JsonEncoder.withIndent('  ').convert(
         [
           ...deps.allDependencies,
-          deps.package,
+          // It includes main package. Ignored.
+          // deps.package,
         ].map((e) => e.toJson(isDirectDependency: directDeps.contains(e.name))).toList(),
       );
     } else {
@@ -193,6 +196,9 @@ class PackageRef {
 ${sb.toString()}''';
     }
 
+    if (path.dirname(outputFilePath) != '.') {
+      Directory.fromUri(Uri.directory(path.dirname(outputFilePath))).createSync(recursive: true);
+    }
     await File(outputFilePath).writeAsString(output);
     return 0;
   } catch (e, s) {
@@ -263,6 +269,12 @@ This option can be specified multiple times, or as a comma-separated list.
     defaultsTo: false,
     negatable: false,
     help: 'Generate JSON file rather than dart file.',
+  );
+  parser.addFlag(
+    'exclude-dartlang',
+    defaultsTo: true,
+    negatable: true,
+    help: 'Excludes dart-lang oss. Set --no-exclude-dartlang if you want add dart-lang oss',
   );
   parser.addFlag('help', abbr: 'h', defaultsTo: false, negatable: false, help: 'Show the help.');
 
