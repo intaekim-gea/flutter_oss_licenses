@@ -142,6 +142,12 @@ The following command line generates JSON file instead of dart file:
 dart run dart_pubspec_licenses:generate -o licenses.json --json
 ```
 
+The current project is included in JSON output by default. To exclude it, pass its `pubspec.yaml` package name:
+
+```shell
+dart run dart_pubspec_licenses:generate -o licenses.json --json --ignore your_project_name
+```
+
 The following table lists the acceptable options:
 
 | Option                        | Abbr. | Description                                                                                                                                                                                                                                                               |
@@ -151,6 +157,7 @@ The following table lists the acceptable options:
 | `--project-root PROJECT_ROOT` | `-p`  | Explicitly specify project root directory that contains `pubspec.lock`.                                                                                                                                                                                                   |
 | `--json`                      | `-j`  | Generate JSON file rather than dart file.                                                                                                                                                                                                                                 |
 | `--split-sdk-licenses`        |       | Split `sky_engine` bundled licenses into separate package entries (e.g. `sky_engine/<component>`). Each sub-component license in the SDK's LICENSE file becomes its own entry in the output.                                                                               |
+| `--exclude-dartlang`          |       | Exclude Dart-related OSS packages (enabled by default). Use `--no-exclude-dartlang` to include them. |
 | `--help`                      | `-h`  | Show the help.                                                                                                                                                                                                                                                            |
 
 ### Environment variables

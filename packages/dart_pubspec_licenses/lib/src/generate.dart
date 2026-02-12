@@ -54,6 +54,7 @@ Future<int> generate(List<String> args) async {
       pubspecYamlPath: path.join(projectRoot, 'pubspec.yaml'),
       ignore: results['ignore'],
       splitSdkLicenses: results['split-sdk-licenses'],
+      excludeDartlang: results['exclude-dartlang'],
     );
 
     final String output;
@@ -206,6 +207,9 @@ ${sb.toString()}''';
     if (writeToStdout) {
       stdout.write(output);
     } else {
+      if (path.dirname(outputFilePath) != '.') {
+        Directory.fromUri(Uri.directory(path.dirname(outputFilePath))).createSync(recursive: true);
+      }
       await File(outputFilePath).writeAsString(output);
     }
     return 0;
@@ -239,6 +243,7 @@ Future<String> findProjectRoot({Directory? from}) async {
 /// - `--project-root` / `-p`: Specify project root directory
 /// - `--json` / `-j`: Generate JSON instead of Dart file
 /// - `--split-sdk-licenses`: Split `sky_engine` bundled licenses into separate entries
+/// - `--exclude-dartlang`: Exclude Dart-related OSS packages
 /// - `--help` / `-h`: Show help message
 ///
 /// Returns configured [ArgParser] instance.
@@ -265,6 +270,7 @@ The default output file path depends on the --json flag:
     help: '''
 Ignore packages by names.
 This option can be specified multiple times, or as a comma-separated list.
+To exclude the current project from JSON output, specify its package name.
 ''',
   );
   parser.addOption(
@@ -285,6 +291,12 @@ This option can be specified multiple times, or as a comma-separated list.
     defaultsTo: false,
     negatable: false,
     help: 'Split sky_engine bundled licenses into separate package entries (e.g. sky_engine/<component>).',
+  );
+  parser.addFlag(
+    'exclude-dartlang',
+    defaultsTo: true,
+    negatable: true,
+    help: 'Exclude Dart-related OSS packages. Use --no-exclude-dartlang to include them.',
   );
   parser.addFlag('help', abbr: 'h', defaultsTo: false, negatable: false, help: 'Show the help.');
 
